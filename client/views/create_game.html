@@ -1,5 +1,21 @@
 <template name="createGame">
-    <h1>TBD</h1>
-    <p>
-    </p>
+
+    <h1 class="ui dividing header">New Game</h1>
+    <div class="ui form segment">
+        <div class="field">
+            <label>Nickname</label>
+            <div class="ui left labeled icon input">
+                <input type="text" name="nick-name"></div>
+        </div>
+        <div class="field">
+            <label>Description</label>
+            <textarea name="description" placeholder="Tell the other players a few words about yourself, as well as any special rules you would like to set for this game"></textarea>
+        </div>
+        <div class="ui error message">
+            <div class="header">We noticed some issues</div>
+        </div>
+        <div class="ui labeled icon positive submit button"> <i class="plus icon"></i>
+            Create Game
+        </div>
+    </div>
 </template>
