@@ -1,0 +1,27 @@
+<template name="home">
+
+    <div class="ui section divider"></div>
+
+    <h2 class="ui dividing header">Cards against Humanity</h2>
+    <div class="ui four items">
+        {{#each games}}
+            {{> listGames}}
+        {{/each}}
+    </div>
+</template>
+
+<template name="listGames">
+    <div class="item">
+        <div class="image">
+            <img src="http://placehold.it/400/19376a/f6d55d&text=Game%20On!" alt=""></div>
+        <div class="content">
+            <div class="meta">{{number_of_players}} players</div>
+            <div class="name">{{name}}</div>
+            <p class="description">{{description}}</p>
+        </div>
+        <div class="ui fluid positive animated fade button">
+            <div class="visible content">Play</div>
+            <div class="hidden content">Enter</div>
+        </div>
+    </div>
+</template>
