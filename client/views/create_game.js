@@ -18,11 +18,14 @@ Template.createGame.rendered = function() {
 
 };
 
-
 Template.createGame.events({
     'submit .ui.form': function(e) {
         nickName = $('input:text').val();
         description = $('textarea').val();
-        // Games.insert({});
+        gameObject = {
+            'description': description
+        };
+        Meteor.call('createGame', gameObject);
+        Router.go('home');
     }
 })

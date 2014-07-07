@@ -1,0 +1,48 @@
+<template name="game">
+    {{#if joined}}
+    <div class="ui red button" id="leave">Leave Game</div>
+    <div class="ui blue button" id="cards">Get Cards</div>
+
+    <div class="ui segment">
+        <h4 class="ui dividing teal header">Score</h4>
+        <div class="ui divided horizontal list">
+            {{#each players}}
+                {{> player}}
+            {{/each}}
+        </div>
+    </div>
+
+    <h4 class="ui black block header">Your Cards</h4>
+
+    <div class="ui five stackable items">
+        {{#each myCards}}
+        {{> card}}
+        {{/each}}
+    </div>
+    {{else}}
+    <div class="ui green button" id="join">Join Game</div>
+    {{/if}}
+</template>
+
+<template name="player">
+    <div class="item"> 
+    {{#if czar}}
+    <i class="legal red icon"></i>
+    {{/if}}
+                <div class="content">
+                    <div class="description">{{username}}</div>
+                </div>
+                <div class="ui green label">{{score}}</div>
+            </div>
+</template>
+
+<template name="card">
+    <div class="item">
+        <a class="ui right corner label"> <i class="check icon"></i>
+        </a>
+        <div class="content">
+            <div class="name">Card</div>
+            <p class="description">{{description}}</p>
+        </div>
+    </div>
+</template>
