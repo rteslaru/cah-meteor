@@ -1,7 +1,6 @@
 Cards = new Meteor.Collection('cards');
 Games = new Meteor.Collection('games');
 
-
 Meteor.methods({
     createGame: function(gameObject) {
         game = _.extend(
@@ -64,6 +63,8 @@ Meteor.methods({
         var game = Games.findOne({
             _id: gameId
         });
+        var allocatedCards = [];
+
 
         for (var i = 0; i < game.players.length; i++) {
             if (game.players[i].id === Meteor.userId()) {
@@ -71,8 +72,20 @@ Meteor.methods({
                     throw new Meteor.Error(500, 'Too many cards');
                 }
             }
+
+            if (! _.isUndefined(game.players[i].cards.id))
+                allocatedCards.push(game.players[i].cards.id)
+
         };
 
+        var whiteCards = Cards.find({type: 'white', id: {$nin: allocatedCards}});
+
+        console.log(whiteCards.count());
+        console.log(allocatedCards);
+
+        var rand = Math.floor(Math.random() * whiteCards.count() + 1);
+
+        var randomCard = whiteCards.fetch()[rand];
 
         Games.update({
             _id: gameId,
@@ -80,9 +93,26 @@ Meteor.methods({
         }, {
             $push: {
                 'players.$.cards': {
-                    'description': 'a'
+                    'id': randomCard._id,
+                    'description': randomCard.description
                 }
             }
         });
+    },
+    playCard: function(gameId, cardId) {
+        var game = Games.findOne({_id: gameId});
+
+        for (var i = 0; i < game.players.length; i++) {
+            if (game.players[i].id === Meteor.userId()) {
+                Games.update({
+                    _id: gameId,
+                    'players.id': Meteor.userId()
+                }, {
+                    $set: {
+                        'players.$.lastCardPlayed': cardId
+                    }
+                })
+            }
+        };
     }
 })

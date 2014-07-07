@@ -39,3 +39,18 @@ Template.game.myCards = function() {
             return game.players[i].cards
     };
 };
+
+Template.game.cardsInPlay = function() {
+    var result = [];
+    var game = Games.findOne({
+        _id: this._id
+    });
+
+    for (var i = 0; i < game.players.length; i++) {
+        if (game.players[i].lastCardPlayed !== null)
+            result.push(game.players[i].lastCardPlayed)
+    };
+
+    return result;
+
+};

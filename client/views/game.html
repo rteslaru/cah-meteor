@@ -12,6 +12,14 @@
         </div>
     </div>
 
+    <h4 class="ui black block header">Table</h4>
+
+    <div class="ui five items">
+        {{#each cardsInPlay}}
+            {{> card}}
+        {{/each}}
+    </div>
+
     <h4 class="ui black block header">Your Cards</h4>
 
     <div class="ui five stackable items">
@@ -37,7 +45,7 @@
 </template>
 
 <template name="card">
-    <div class="item">
+    <div class="item" data-id="{{id}}">
         <a class="ui right corner label"> <i class="check icon"></i>
         </a>
         <div class="content">
