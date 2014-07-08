@@ -1,7 +1,18 @@
 <template name="game">
     {{#if joined}}
-    <div class="ui red button" id="leave">Leave Game</div>
-    <div class="ui blue button" id="cards">Get Cards</div>
+        <div class="ui negative button" id="leave">Leave Game</div>
+
+        {{#if isCzar}}
+
+    <div class="ui green message">
+            <div class="header">You're the czar this round! </div>
+            <p>Choose the funniest answer to the question on the black card below.</p>
+    </div>
+    {{/if}}
+    <div class="ui black stacked inverted segment">
+        <h5 class="ui dividing header">Black Card</h5>
+        <p>{{blackCard}}</p>
+    </div>
 
     <div class="ui segment">
         <h4 class="ui dividing teal header">Score</h4>
@@ -12,45 +23,49 @@
         </div>
     </div>
 
-    <h4 class="ui black block header">Table</h4>
+    <h4 class="ui teal block header">Table</h4>
 
-    <div class="ui five items">
+    <div class="ui five stackable items" id="table">
         {{#each cardsInPlay}}
             {{> card}}
         {{/each}}
     </div>
-
-    <h4 class="ui black block header">Your Cards</h4>
+{{#unless isCzar}}
+    <h4 class="ui teal block header">Your Cards</h4>
+    <div class="ui labeled icon blue button" id="cards"> <i class="plus icon"></i>
+        Get Cards
+    </div>
 
     <div class="ui five stackable items">
         {{#each myCards}}
         {{> card}}
         {{/each}}
     </div>
+    {{/unless}}
     {{else}}
     <div class="ui green button" id="join">Join Game</div>
     {{/if}}
 </template>
 
 <template name="player">
-    <div class="item"> 
-    {{#if czar}}
-    <i class="legal red icon"></i>
-    {{/if}}
-                <div class="content">
-                    <div class="description">{{username}}</div>
-                </div>
-                <div class="ui green label">{{score}}</div>
-            </div>
+    <div class="item">
+        {{#if czar}} <i class="legal red icon"></i>
+        {{/if}}
+        <div class="content">
+            <div class="description">{{username}}</div>
+        </div>
+        <div class="ui green label">{{score}}</div>
+    </div>
 </template>
 
 <template name="card">
-    <div class="item" data-id="{{id}}">
-        <a class="ui right corner label"> <i class="check icon"></i>
+    <div class="item" data-game-id="{{../_id}}">
+        <a class="ui right corner label">
+            <i class="check icon"></i>
         </a>
         <div class="content">
             <div class="name">Card</div>
-            <p class="description">{{description}}</p>
+            <p class="description">{{cardText}}</p>
         </div>
     </div>
 </template>

@@ -15,14 +15,14 @@ Meteor.methods({
         whiteCards.forEach(function(doc) {
             Cards.insert({
                 type: 'white',
-                description: doc
+                cardText: doc
             });
         });
 
         blackCards.forEach(function(doc) {
             Cards.insert({
                 type: 'black',
-                description: doc
+                cardText: doc
             });
         });
     }

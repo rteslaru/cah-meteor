@@ -8,11 +8,52 @@ Meteor.methods({
                 'createdBy': Meteor.userId(),
                 'number_of_players': 0,
                 'name': 'CaH Meteor',
-                'players': []
+                'players': [],
+                'blackCardId': null,
+                'cardText': null,
             });
         Games.insert(game);
     },
+    setBlackCard: function(gameId) {
+        var game = Games.find({
+            _id: gameId
+        });
+        var lastBlackCard = [game.blackCardId];
+
+        var blackCards = Cards.find({
+            type: 'black',
+            _id: {
+                $nin: lastBlackCard
+            }
+        });
+
+        var rand = Math.floor(Math.random() * blackCards.count() + 1);
+        var blackCard = blackCards.fetch()[rand];
+
+        Games.update({
+            _id: gameId
+        }, {
+            $set: {
+                'blackCardId': blackCard._id,
+                'blackCard': blackCard.cardText
+            }
+        });
+    },
     joinGame: function(gameId) {
+
+        var isCzar = true;
+        var game = Games.findOne({
+            _id: gameId
+        });
+
+        for (var i = 0; i < game.players.length; i++) {
+            if (game.players[i].czar)
+                isCzar = false;
+        };
+
+        if (isCzar)
+            Meteor.call('setBlackCard', gameId);
+
         Games.update({
             _id: gameId
         }, {
@@ -23,7 +64,7 @@ Meteor.methods({
                 'players': {
                     'id': Meteor.userId(),
                     'score': 0,
-                    'czar': false,
+                    'czar': isCzar,
                     'username': Meteor.user().username,
                     'lastCardPlayed': null,
                     'playedThisRound': false,
@@ -39,7 +80,7 @@ Meteor.methods({
 
         for (var i = 0; i < game.players.length; i++) {
             if (game.players[i].id === Meteor.userId()) {
-                var selector = 'players.' + i + '.id';
+
                 Games.update({
                     _id: gameId,
                     'players.id': Meteor.userId()
@@ -53,12 +94,66 @@ Meteor.methods({
                         'number_of_players': -1
                     }
                 });
+
+                if (game.players[i].czar && game.players.length > 1) {
+                    Games.update({
+                        _id: gameId
+                    }, {
+                        $set: {
+                            'players.0.czar': true
+                        }
+                    });
+                }
+
+                if (game.number_of_players === 1)
+                    Games.remove({
+                        _id: gameId
+                    });
             }
         };
 
     },
-    startRound: function() {},
-    endRound: function() {},
+    score: function(gameId, cardId) {
+        Meteor.call('setBlackCard', gameId);
+        var game = Games.findOne({
+            _id: gameId
+        });
+        var winner = '';
+
+        // very ugly and expensive
+
+        for (var i = 0; i < game.players.length; i++) {
+            Games.update({
+                _id: gameId,
+                'players.id': game.players[i].id
+            }, {
+                $set: {
+                    'players.$.cards': [],
+                    'players.$.czar': false,
+                    'players.$.lastCardPlayed': null
+                }
+            });
+            for (var j = 0; j < game.players[i].cards.length; j++) {
+                if (game.players[i].cards[j]._id === cardId) {
+                    winner = game.players[i].id;
+                }
+            };
+
+        };
+
+        Games.update({
+            _id: gameId,
+            'players.id': winner
+        }, {
+            $inc: {
+                'players.$.score': 1
+            },
+            $set: {
+                'players.$.czar': true
+            }
+        });
+
+    },
     getCards: function(gameId) {
         var game = Games.findOne({
             _id: gameId
@@ -73,12 +168,17 @@ Meteor.methods({
                 }
             }
 
-            if (! _.isUndefined(game.players[i].cards.id))
-                allocatedCards.push(game.players[i].cards.id)
+            if (!_.isUndefined(game.players[i].cards._id))
+                allocatedCards.push(game.players[i].cards._id)
 
         };
 
-        var whiteCards = Cards.find({type: 'white', id: {$nin: allocatedCards}});
+        var whiteCards = Cards.find({
+            type: 'white',
+            id: {
+                $nin: allocatedCards
+            }
+        });
 
         console.log(whiteCards.count());
         console.log(allocatedCards);
@@ -93,17 +193,28 @@ Meteor.methods({
         }, {
             $push: {
                 'players.$.cards': {
-                    'id': randomCard._id,
-                    'description': randomCard.description
+                    '_id': randomCard._id,
+                    'cardText': randomCard.cardText
                 }
             }
         });
     },
     playCard: function(gameId, cardId) {
-        var game = Games.findOne({_id: gameId});
+        var game = Games.findOne({
+            _id: gameId
+        });
 
         for (var i = 0; i < game.players.length; i++) {
-            if (game.players[i].id === Meteor.userId()) {
+            if (game.players[i].lastCardPlayed === cardId) {
+                Games.update({
+                    _id: gameId,
+                    'players.id': Meteor.userId()
+                }, {
+                    $set: {
+                        'players.$.lastCardPlayed': null
+                    }
+                });
+            } else if (game.players[i].id === Meteor.userId()) {
                 Games.update({
                     _id: gameId,
                     'players.id': Meteor.userId()

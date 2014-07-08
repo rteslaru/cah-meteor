@@ -16,7 +16,26 @@ Template.game.events({
 
 Template.card.events({
     'click .item': function(e, tpl) {
-        $(tpl.firstNode.getElementsByClassName('label')).toggleClass('green');
+
+        var gameId = $(tpl.firstNode).data('gameId');
+        var cardId = tpl.data._id;
+        var game = Games.findOne({_id: gameId});
+        var isCzar = false;
+
+        $('.item .label').removeClass('green');
+        $(tpl.firstNode.getElementsByClassName('label')).addClass('green');
+
+        for (var i = 0; i < game.players.length; i++) {
+            if (game.players[i].id === Meteor.userId())
+                isCzar = game.players[i].czar;
+        };
+
+        if (isCzar) {
+            console.log(cardId);
+            Meteor.call('score', gameId, cardId);
+        } else {
+            Meteor.call('playCard', gameId, cardId);
+        }
     }
 })
 
@@ -40,6 +59,15 @@ Template.game.myCards = function() {
     };
 };
 
+Template.game.isCzar = function() {
+    var game = Games.findOne({_id: this._id});
+
+    for (var i = 0; i < game.players.length; i++) {
+        if (game.players[i].id === Meteor.userId())
+            return game.players[i].czar;
+    };
+};
+
 Template.game.cardsInPlay = function() {
     var result = [];
     var game = Games.findOne({
@@ -51,6 +79,6 @@ Template.game.cardsInPlay = function() {
             result.push(game.players[i].lastCardPlayed)
     };
 
-    return result;
+    return Cards.find({_id: {$in: result}});
 
 };
